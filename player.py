@@ -1,5 +1,5 @@
 import pygame
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED, PLAYER_SHOT_COOLDOWN
 from circleshape import CircleShape
 from Shot import Shot
 
@@ -9,6 +9,7 @@ class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.timer = 0
 
     def draw(self, screen):
         pygame.draw.polygon(screen, "white", self.triangle(), 2)
@@ -28,6 +29,7 @@ class Player(CircleShape):
     def update(self, dt):
         keys = pygame.key.get_pressed()
 
+        
         #rotate left when 'a' is pressed
         if keys[pygame.K_a]:
             self.rotate(dt * -1)
@@ -46,7 +48,21 @@ class Player(CircleShape):
 
         #shoot when 'spacebar' is pressed
         if keys[pygame.K_SPACE]:
-            self.shoot()
+            if self.timer <= 0:
+                self.shoot()
+                self.timer += PLAYER_SHOT_COOLDOWN
+
+        #reduce cooldown if spacebar isnt pressed
+        if self.timer > 0:
+            self.timer -= dt
+        
+        #if the timer is less than 0 reset it to 0
+        if self.timer < 0:
+            self.timer = 0
+        
+
+
+        
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
